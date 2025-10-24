@@ -1,0 +1,3 @@
+/backend/.venv
+/backend/django-project/backend/migrations
+/backend/django-project/.env
