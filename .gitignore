@@ -2,3 +2,5 @@
 /backend/django-project/backend/migrations
 /backend/django-project/.env
 /backend/bruno
+
+/frontend/vite-project/node_modules
