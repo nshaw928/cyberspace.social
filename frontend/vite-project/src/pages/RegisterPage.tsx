@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,7 +28,7 @@ function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/register", {
+      const response = await fetch("http://127.0.0.1:8000/account/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,10 +39,39 @@ function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect to login page after successful registration
-        navigate(`/login`);
+        // After successful registration, auto-login
+        const loginResponse = await fetch("http://127.0.0.1:8000/account/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ 
+            username: formData.username, 
+            password: formData.password 
+          }),
+        });
+
+        const loginData = await loginResponse.json();
+
+        if (loginResponse.ok && loginData.success) {
+          // Update auth state
+          await login();
+          // Redirect to feed
+          navigate("/feed");
+        } else {
+          // If auto-login fails, redirect to login page
+          navigate("/login");
+        }
       } else {
-        setError(data.message || "Registration failed");
+        // Display error from backend
+        if (data.username) {
+          setError(data.username[0]);
+        } else if (data.email) {
+          setError(data.email[0]);
+        } else {
+          setError(data.message || "Registration failed");
+        }
       }
     } catch (err) {
       setError("Network error occurred");
@@ -89,11 +120,17 @@ function RegisterPage() {
                 required
               />
             </div>
-            {error && <p className="text-red-600">{error}</p>}
-            <Button type="submit" disabled={loading}>
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Creating account..." : "Register"}
             </Button>
           </form>
+          <div className="text-center text-sm mt-4">
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary hover:underline">
+              Sign In
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

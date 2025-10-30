@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 function LoginPage() {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,15 +27,17 @@ function LoginPage() {
             headers: {
             "Content-Type": "application/json",
             },
-            body: JSON.stringify({ email, password }),
+            credentials: "include", // Important: include cookies
+            body: JSON.stringify({ username, password }),
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            // Store token (e.g., in localStorage or context)
-            localStorage.setItem("token", data.token);
-            navigate("/dashboard"); // Redirect on success
+        if (response.ok && data.success) {
+            // Call login to update auth state
+            await login();
+            // Redirect to feed
+            navigate("/feed");
         } else {
             setError(data.message || "Login failed");
         }
@@ -53,14 +57,14 @@ function LoginPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {error && <div className="text-red-500 text-sm">{error}</div>}
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="username">Username</Label>
                         <Input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             required
                         />
                     </div>
@@ -80,7 +84,7 @@ function LoginPage() {
                     </form>
           <div className="text-center text-sm">
             Don't have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline">
+            <Link to="/register" className="text-primary hover:underline">
               Create Account
             </Link>
           </div>

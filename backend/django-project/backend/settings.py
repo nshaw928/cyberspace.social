@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     # Django Apps
     'profiles',
     'accounts',
+    'posts',
+    'friendships',
 ]
 
 MIDDLEWARE = [
@@ -68,7 +70,12 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS Settings for cookie-based authentication
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",  # Alternative localhost
+]
+CORS_ALLOW_CREDENTIALS = True  # Required for cookies
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -141,3 +148,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Media files (User uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
