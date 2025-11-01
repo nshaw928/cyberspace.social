@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Upload } from "lucide-react";
 
 interface UserSettings {
   name: string;
@@ -11,6 +12,7 @@ interface UserSettings {
   bio: string;
   link: string;
   email: string;
+  profilePicture?: string;
 }
 
 export default function SettingsPage() {
@@ -20,7 +22,13 @@ export default function SettingsPage() {
     bio: "",
     link: "",
     email: "",
+    profilePicture: undefined,
   });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -46,6 +54,9 @@ export default function SettingsPage() {
           bio: data.bio || "",
           link: data.link || "",
           email: data.email || "",
+          profilePicture: data.profile_picture_base64 
+            ? `data:image/jpeg;base64,${data.profile_picture_base64}` 
+            : undefined,
         });
       }
       setLoading(false);
@@ -95,6 +106,64 @@ export default function SettingsPage() {
     }
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select an image file");
+      return;
+    }
+
+    // Validate file size (500KB max)
+    if (file.size > 500 * 1024) {
+      setUploadError("Image must be smaller than 500KB");
+      return;
+    }
+
+    setSelectedImage(file);
+    setUploadError("");
+    setUploadSuccess(false);
+  };
+
+  const handleUploadProfilePicture = async () => {
+    if (!selectedImage) return;
+
+    setUploading(true);
+    setUploadError("");
+    setUploadSuccess(false);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+
+      const response = await fetch("http://localhost:8000/api/profile/picture/", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (response.ok) {
+        setUploadSuccess(true);
+        setSelectedImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        // Refresh profile to show new picture
+        await fetchSettings();
+        setTimeout(() => setUploadSuccess(false), 3000);
+      } else {
+        const data = await response.json();
+        setUploadError(data.error || "Failed to upload profile picture");
+      }
+    } catch (err) {
+      setUploadError("Network error occurred");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -115,6 +184,70 @@ export default function SettingsPage() {
         <p className="text-sm text-muted-foreground">
           Update your profile information and account settings
         </p>
+      </div>
+
+      {/* Profile Picture Upload */}
+      <div className="space-y-4 bg-card border border-border rounded-lg p-6">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-1">Profile Picture</h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            Upload a square image (max 500KB, JPEG/PNG only)
+          </p>
+        </div>
+
+        {/* Profile Picture Preview */}
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
+            {settings.profilePicture ? (
+              <img 
+                src={settings.profilePicture} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+              />
+            ) : (
+              <span className="text-white text-2xl font-bold">
+                {settings.name[0] || "?"}
+              </span>
+            )}
+          </div>
+          <div className="flex-1 space-y-2">
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={handleImageSelect}
+              className="text-sm"
+            />
+            {selectedImage && (
+              <p className="text-xs text-muted-foreground">
+                Selected: {selectedImage.name} ({Math.round(selectedImage.size / 1024)}KB)
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Upload Error/Success */}
+        {uploadError && (
+          <div className="p-3 bg-destructive/10 border border-destructive rounded-md">
+            <p className="text-sm text-destructive">{uploadError}</p>
+          </div>
+        )}
+        {uploadSuccess && (
+          <div className="p-3 bg-green-500/10 border border-green-500 rounded-md">
+            <p className="text-sm text-green-500">Profile picture updated successfully!</p>
+          </div>
+        )}
+
+        {/* Upload Button */}
+        <Button
+          onClick={handleUploadProfilePicture}
+          disabled={!selectedImage || uploading}
+          className="w-full gap-2"
+          variant="outline"
+        >
+          <Upload className="w-4 h-4" />
+          {uploading ? "Uploading..." : "Upload Profile Picture"}
+        </Button>
       </div>
 
       {/* Settings Form */}

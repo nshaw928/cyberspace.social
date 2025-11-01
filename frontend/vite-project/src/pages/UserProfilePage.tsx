@@ -102,7 +102,7 @@ export default function UserProfilePage() {
       {/* Profile Information Section */}
       <div className="grid grid-cols-[auto_1fr] gap-4">
         {/* Profile Picture */}
-        <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
+        <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
           {profile.profilePicture ? (
             <img
               src={profile.profilePicture}

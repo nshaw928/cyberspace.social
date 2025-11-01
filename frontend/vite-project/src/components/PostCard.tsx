@@ -73,7 +73,7 @@ export default function PostCard({ post, onComment }: PostCardProps) {
       {/* Header Row */}
       <div className="p-4 flex items-center gap-3">
         <Link to={`/profile/${post.user.username}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
             {post.user.profilePicture ? (
               <img src={post.user.profilePicture} alt={post.user.displayName} className="w-full h-full object-cover" />
             ) : (

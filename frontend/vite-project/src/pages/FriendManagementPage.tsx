@@ -275,12 +275,12 @@ export default function FriendManagementPage() {
                   to={`/profile/${request.friend.username}`} 
                   className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
                     {request.friend.profile_picture_base64 ? (
                       <img 
                         src={`data:image/jpeg;base64,${request.friend.profile_picture_base64}`} 
                         alt={request.friend.display_name} 
-                        className="w-full h-full rounded-full object-cover" 
+                        className="w-full h-full object-cover" 
                       />
                     ) : (
                       <span className="text-white font-semibold">{request.friend.display_name[0]}</span>
@@ -320,12 +320,12 @@ export default function FriendManagementPage() {
                   to={`/profile/${request.requester.username}`} 
                   className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
                     {request.requester.profile_picture_base64 ? (
                       <img 
                         src={`data:image/jpeg;base64,${request.requester.profile_picture_base64}`} 
                         alt={request.requester.display_name} 
-                        className="w-full h-full rounded-full object-cover" 
+                        className="w-full h-full object-cover" 
                       />
                     ) : (
                       <span className="text-white font-semibold">{request.requester.display_name[0]}</span>
@@ -374,9 +374,9 @@ export default function FriendManagementPage() {
                     to={`/profile/${friend.username}`} 
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
                       {friend.profilePicture ? (
-                        <img src={friend.profilePicture} alt={friend.displayName} className="w-full h-full rounded-full object-cover" />
+                        <img src={friend.profilePicture} alt={friend.displayName} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-white font-semibold">{friend.displayName[0]}</span>
                       )}
