@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
@@ -6,8 +6,35 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FeedPage from "./pages/FeedPage";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfilePage from "./pages/UserProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import FriendManagementPage from "./pages/FriendManagementPage";
+import { Button } from "./components/ui/button";
+import { X } from "lucide-react";
+
+// Wrapper component for UserProfilePage to pass custom Layout props
+function UserProfilePageWrapper() {
+  const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
+
+  return (
+    <Layout
+      centerContent={`@${username}`}
+      rightAction={
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/feed")}
+          className="p-2 hover:bg-accent rounded-md transition-colors"
+        >
+          <X className="w-5 h-5 text-foreground" />
+        </Button>
+      }
+    >
+      <UserProfilePage />
+    </Layout>
+  );
+}
 
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -66,9 +93,7 @@ function AppRoutes() {
         path="/profile/:username"
         element={
           isAuthenticated ? (
-            <Layout>
-              <ProfilePage />
-            </Layout>
+            <UserProfilePageWrapper />
           ) : (
             <Navigate to="/login" replace />
           )

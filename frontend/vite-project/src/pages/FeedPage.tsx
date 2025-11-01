@@ -6,10 +6,12 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
   const observer = useRef<IntersectionObserver | null>(null);
+  const hasInitialized = useRef(false);
 
-  // Mock data for development
-  const fetchMockPosts = (pageNum: number, isRefresh = false) => {
+  // Fetch posts from API
+  const fetchPosts = async (pageNum: number, isRefresh = false) => {
     if (loading || refreshing) return;
 
     if (isRefresh) {
@@ -18,34 +20,64 @@ export default function FeedPage() {
       setLoading(true);
     }
 
-    setTimeout(() => {
-      const mockPosts: Post[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `${pageNum}-${i}`,
-        user: {
-          username: `user${i}`,
-          displayName: `User ${i}`,
-          profilePicture: undefined,
-        },
-        imageUrl: `https://picsum.photos/seed/${pageNum}-${i}/600/600`,
-        caption: `This is post ${i} from page ${pageNum}. Lorem ipsum dolor sit amet.`,
-        createdAt: new Date(Date.now() - i * 3600000).toISOString(),
-      }));
+    try {
+      const response = await fetch(`http://localhost:8000/api/posts/feed?page=${pageNum}`, {
+        credentials: "include",
+      });
 
-      if (isRefresh) {
-        setPosts(mockPosts);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Map backend response to frontend Post type
+        const mappedPosts = data.posts.map((post: any) => ({
+          id: post.id,
+          user: {
+            username: post.username,
+            displayName: post.display_name,
+            profilePicture: post.profile_picture_base64 
+              ? `data:image/jpeg;base64,${post.profile_picture_base64}` 
+              : undefined,
+          },
+          imageUrl: `http://localhost:8000/media/${post.image_path}`,
+          caption: post.caption,
+          createdAt: post.created_at,
+          comments: post.comments?.map((comment: any) => ({
+            id: comment.id,
+            user: {
+              username: comment.username,
+              displayName: comment.display_name,
+            },
+            text: comment.comment_text,
+            createdAt: comment.created_at,
+          })),
+        }));
+        
+        if (isRefresh) {
+          setPosts(mappedPosts);
+          setPage(1);
+        } else {
+          setPosts(prev => [...prev, ...mappedPosts]);
+        }
+
+        setHasMore(data.hasMore);
       } else {
-        setPosts(prev => [...prev, ...mockPosts]);
+        console.error("Failed to fetch posts");
       }
-
-      setHasMore(pageNum < 5); // Mock: only 5 pages
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
       setLoading(false);
       setRefreshing(false);
-    }, 1000);
+    }
   };
 
   // Load initial posts
   useEffect(() => {
-    fetchMockPosts(1);
+    // Prevent double-fetch in React Strict Mode
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
+    fetchPosts(1);
   }, []);
 
   // Intersection Observer for infinite scroll
@@ -54,22 +86,21 @@ export default function FeedPage() {
     
     if (observer.current) observer.current.disconnect();
 
-    let currentPage = 1;
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        currentPage++;
-        fetchMockPosts(currentPage);
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchPosts(nextPage);
       }
     });
 
     if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  }, [loading, hasMore, page]);
 
   // Handle comment submission
   const handleComment = async (postId: string, commentText: string) => {
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch(`http://127.0.0.1:8000/api/posts/${postId}/comments`, {
+      const response = await fetch(`http://localhost:8000/api/posts/${postId}/comments/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,6 +111,7 @@ export default function FeedPage() {
 
       if (response.ok) {
         console.log("Comment posted successfully");
+        // Optionally refresh the feed to show the new comment
       }
     } catch (error) {
       console.error("Error posting comment:", error);

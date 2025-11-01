@@ -29,21 +29,30 @@ export default function SettingsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // TODO: Fetch user settings from API
-    fetchMockSettings();
+    fetchSettings();
   }, []);
 
-  const fetchMockSettings = () => {
-    setTimeout(() => {
-      setSettings({
-        name: "John Doe",
-        username: "johndoe",
-        bio: "Living in the cyberspace 🌐 | Tech enthusiast | Coffee lover ☕",
-        link: "https://example.com",
-        email: "john.doe@example.com",
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/profile/me/", {
+        credentials: "include",
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSettings({
+          name: data.display_name || "",
+          username: data.username || "",
+          bio: data.bio || "",
+          link: data.link || "",
+          email: data.email || "",
+        });
+      }
       setLoading(false);
-    }, 500);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -59,21 +68,25 @@ export default function SettingsPage() {
     setSuccess(false);
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch("http://127.0.0.1:8000/api/profile/me", {
+      const response = await fetch("http://localhost:8000/api/profile/me/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          display_name: settings.name,
+          bio: settings.bio,
+          link: settings.link,
+        }),
       });
 
       if (response.ok) {
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       } else {
-        setError("Failed to save settings");
+        const data = await response.json();
+        setError(data.error || "Failed to save settings");
       }
     } catch (err) {
       setError("Network error occurred");

@@ -13,7 +13,7 @@ function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, setAuthenticated } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,7 +22,7 @@ function LoginPage() {
 
         try {
         // Call your backend API
-        const response = await fetch("http://127.0.0.1:8000/account/token", {
+        const response = await fetch("http://localhost:8000/account/token", {
             method: "POST",
             headers: {
             "Content-Type": "application/json",
@@ -34,9 +34,13 @@ function LoginPage() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // Call login to update auth state
-            await login();
-            // Redirect to feed
+            // Immediately mark as authenticated since backend confirmed success
+            setAuthenticated(true);
+            
+            // Fetch username and other details in background (don't await)
+            login().catch(err => console.error("Failed to fetch user details:", err));
+            
+            // Navigate immediately
             navigate("/feed");
         } else {
             setError(data.message || "Login failed");

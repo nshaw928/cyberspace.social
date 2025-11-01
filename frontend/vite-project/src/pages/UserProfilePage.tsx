@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import AddPostModal from "@/components/AddPostModal";
 import PostDetailModal from "@/components/PostDetailModal";
 
 interface UserProfile {
@@ -19,21 +18,26 @@ interface ProfilePost {
   createdAt: string;
 }
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
+  const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<ProfilePost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddPost, setShowAddPost] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (username) {
+      fetchProfile();
+    }
+  }, [username]);
 
   const fetchProfile = async () => {
+    if (!username) return;
+
     try {
       // Fetch profile data
-      const profileResponse = await fetch("http://localhost:8000/api/profile/me/", {
+      const profileResponse = await fetch(`http://localhost:8000/api/profile/${username}/`, {
         credentials: "include",
       });
 
@@ -44,44 +48,51 @@ export default function ProfilePage() {
           displayName: profileData.display_name,
           bio: profileData.bio || "",
           link: profileData.link || "",
-          profilePicture: profileData.profile_picture_base64 
-            ? `data:image/jpeg;base64,${profileData.profile_picture_base64}` 
+          profilePicture: profileData.profile_picture_base64
+            ? `data:image/jpeg;base64,${profileData.profile_picture_base64}`
             : undefined,
         });
+      } else {
+        setError("User not found");
       }
 
       // Fetch user's posts
-      const postsResponse = await fetch("http://localhost:8000/api/posts/me/", {
+      const postsResponse = await fetch(`http://localhost:8000/api/posts/user/${username}/`, {
         credentials: "include",
       });
 
       if (postsResponse.ok) {
         const postsData = await postsResponse.json();
-        setPosts(postsData.map((post: any) => ({
-          id: post.id,
-          imageUrl: `http://localhost:8000/media/${post.image_path}`,
-          caption: post.caption,
-          createdAt: post.created_at,
-        })));
+        setPosts(
+          postsData.map((post: any) => ({
+            id: post.id,
+            imageUrl: `http://localhost:8000/media/${post.image_path}`,
+            caption: post.caption,
+            createdAt: post.created_at,
+          }))
+        );
       }
 
       setLoading(false);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      setError("Failed to load profile");
       setLoading(false);
     }
   };
 
-  const handlePostCreated = () => {
-    // Refresh profile and posts after creating a new one
-    setLoading(true);
-    fetchProfile();
-  };
-
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-destructive text-lg">{error || "Profile not found"}</p>
       </div>
     );
   }
@@ -93,9 +104,15 @@ export default function ProfilePage() {
         {/* Profile Picture */}
         <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
           {profile.profilePicture ? (
-            <img src={profile.profilePicture} alt={profile.displayName} className="w-full h-full object-cover" />
+            <img
+              src={profile.profilePicture}
+              alt={profile.displayName}
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <span className="text-white text-2xl md:text-3xl font-bold">{profile.displayName[0]}</span>
+            <span className="text-white text-2xl md:text-3xl font-bold">
+              {profile.displayName[0]}
+            </span>
           )}
         </div>
 
@@ -118,20 +135,11 @@ export default function ProfilePage() {
 
       {/* Posts Section */}
       <div className="space-y-4">
-        {/* Header with Post count and Add button */}
+        {/* Header with Post count (NO Add button for other users) */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">
-            Your Posts ({posts.length})
+            Posts ({posts.length})
           </h3>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setShowAddPost(true)}
-            className="gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Post</span>
-          </Button>
         </div>
 
         {/* Posts Grid */}
@@ -154,25 +162,10 @@ export default function ProfilePage() {
         ) : (
           <div className="text-center py-12 text-muted-foreground border border-dashed border-border rounded-lg">
             <p className="text-lg font-semibold mb-2">No posts yet</p>
-            <p className="text-sm mb-4">Share your first moment</p>
-            <Button
-              variant="outline"
-              onClick={() => setShowAddPost(true)}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Post</span>
-            </Button>
+            <p className="text-sm">This user hasn't shared any posts</p>
           </div>
         )}
       </div>
-
-      {/* Add Post Modal */}
-      <AddPostModal
-        open={showAddPost}
-        onOpenChange={setShowAddPost}
-        onPostCreated={handlePostCreated}
-      />
 
       {/* Post Detail Modal */}
       {selectedPostId && (

@@ -122,7 +122,7 @@ export default function AddPostModal({ open, onOpenChange, onPostCreated }: AddP
       formData.append("caption", caption);
 
       // TODO: Replace with actual API call
-      const response = await fetch("http://127.0.0.1:8000/api/posts", {
+      const response = await fetch("http://localhost:8000/api/posts/", {
         method: "POST",
         credentials: "include",
         body: formData,

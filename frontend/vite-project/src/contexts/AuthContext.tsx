@@ -3,9 +3,11 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
+  username: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  setAuthenticated: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,10 +19,11 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [username, setUsername] = useState<string | null>(null);
 
   const checkAuth = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/account/authenticated", {
+      const response = await fetch("http://localhost:8000/account/authenticated", {
         method: "POST",
         credentials: "include", // Important: include cookies
       });
@@ -28,12 +31,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         const data = await response.json();
         setIsAuthenticated(data.authenticated === true);
+        
+        // Fetch username if authenticated
+        if (data.authenticated) {
+          try {
+            const profileResponse = await fetch("http://localhost:8000/api/profile/me/", {
+              credentials: "include",
+            });
+            if (profileResponse.ok) {
+              const profileData = await profileResponse.json();
+              setUsername(profileData.username);
+            }
+          } catch (err) {
+            console.error("Failed to fetch username:", err);
+          }
+        }
+      } else if (response.status === 401) {
+        // 401 means not authenticated - this is expected, not an error
+        setIsAuthenticated(false);
+        setUsername(null);
       } else {
         setIsAuthenticated(false);
+        setUsername(null);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       setIsAuthenticated(false);
+      setUsername(null);
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +69,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/account/logout", {
+      const response = await fetch("http://localhost:8000/account/logout", {
         method: "POST",
         credentials: "include",
       });
 
       if (response.ok) {
         setIsAuthenticated(false);
+        setUsername(null);
       }
     } catch (error) {
       console.error("Logout failed:", error);
@@ -64,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, username, login, logout, checkAuth, setAuthenticated: setIsAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

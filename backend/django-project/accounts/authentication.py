@@ -1,4 +1,8 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CookiesJWTAuthentication(JWTAuthentication):
     def authenticate(self, request):
@@ -7,11 +11,13 @@ class CookiesJWTAuthentication(JWTAuthentication):
         if not access_token:
             return None
         
-        validated_token = self.get_validated_token(access_token)
-
         try:
+            validated_token = self.get_validated_token(access_token)
             user = self.get_user(validated_token)
-        except:
+            return (user, validated_token)
+        except (InvalidToken, TokenError) as e:
+            logger.warning(f"JWT validation failed: {e}")
             return None
-        
-        return (user, validated_token)
+        except Exception as e:
+            logger.error(f"Unexpected error in JWT auth: {e}")
+            return None

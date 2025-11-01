@@ -20,5 +20,14 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('accounts.urls')),
-    path('profile/', include('profiles.urls')),
+    path('api/profile/', include('profiles.urls')),
+    path('api/posts/', include('posts.urls')),
+    path('api/friends/', include('friendships.urls')),
 ]
+
+# Serve media files in development
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

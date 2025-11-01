@@ -2,14 +2,18 @@ import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, User, Users, Settings, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
   children: ReactNode;
+  centerContent?: string;
+  rightAction?: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, centerContent, rightAction }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { username } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
   const isFriendsPage = location.pathname === "/friends";
@@ -18,15 +22,24 @@ export default function Layout({ children }: LayoutProps) {
 
   // Determine what to show in the center of the top bar
   const getTopBarCenter = () => {
+    // If custom centerContent is provided, use it
+    if (centerContent !== undefined) {
+      return centerContent;
+    }
+    
     if (isProfilePage || isSettingsPage) {
-      // TODO: Get actual username from user context
-      return "johndoe";
+      return username || "Loading...";
     }
     return "cyberspace.social";
   };
 
   // Determine what to show on the right of the top bar
   const getTopBarRight = () => {
+    // If custom rightAction is provided, use it
+    if (rightAction !== undefined) {
+      return rightAction;
+    }
+    
     if (isFriendsPage) {
       // Show X icon to go back to feed
       return (

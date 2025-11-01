@@ -24,18 +24,20 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 key = "access_token",
                 value = access_token,
                 httponly = True,
-                secure = True,
-                samesite = 'None',
-                path = '/'
+                secure = False,
+                samesite = 'Lax',
+                path = '/',
+                max_age = 86400  # 24 hours in seconds
             )
 
             res.set_cookie(
                 key = "refresh_token",
                 value = refresh_token,
                 httponly = True,
-                secure = True,
-                samesite = 'None',
-                path = '/'
+                secure = False,
+                samesite = 'Lax',
+                path = '/',
+                max_age = 604800  # 7 days in seconds
             )
 
             return res
@@ -64,9 +66,10 @@ class CustomRefreshToken(TokenRefreshView):
                 key = 'access_token',
                 value = access_token,
                 httponly = True,
-                secure = True,
-                samesite = 'None',
-                path = '/'
+                secure = False,
+                samesite = 'Lax',
+                path = '/',
+                max_age = 86400  # 24 hours in seconds
             ) # Set new access token
 
             return res
@@ -79,17 +82,28 @@ def logout(request):
     try:
         res = Response()
         res.data = {'success': True}
-        res.delete_cookie('access_token', path='/', samesite='None')
-        res.delete_cookie('refresh_token', path='/', samesite='None')
+        res.delete_cookie('access_token', path='/', samesite='Lax')
+        res.delete_cookie('refresh_token', path='/', samesite='Lax')
         return res
     
     except:
         return Response({'success': False})
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def is_authenticated(request):
-    return Response({'authenticated': True})
+    # Try to authenticate using the custom JWT authentication
+    from accounts.authentication import CookiesJWTAuthentication
+    
+    auth = CookiesJWTAuthentication()
+    try:
+        user_auth = auth.authenticate(request)
+        if user_auth is not None:
+            return Response({'authenticated': True})
+        else:
+            return Response({'authenticated': False})
+    except:
+        return Response({'authenticated': False})
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
