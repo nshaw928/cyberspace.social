@@ -11,6 +11,7 @@ DEPLOYMENT.md
 DOCKER_SETUP_SUMMARY.md
 QUICK_START.md
 QUICKSTART.md
+SCAFFOLD_SUMMARY.md
 
 # Environment files (keep .env.example)
 .env
