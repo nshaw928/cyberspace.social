@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/config/api";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AddPostModal from "@/components/AddPostModal";
@@ -33,7 +34,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       // Fetch profile data
-      const profileResponse = await fetch("http://localhost:8000/api/profile/me/", {
+      const profileResponse = await fetch(getApiUrl("/api/profile/me/", {
         credentials: "include",
       });
 
@@ -51,7 +52,7 @@ export default function ProfilePage() {
       }
 
       // Fetch user's posts
-      const postsResponse = await fetch("http://localhost:8000/api/posts/me/", {
+      const postsResponse = await fetch(getApiUrl("/api/posts/me/", {
         credentials: "include",
       });
 
@@ -59,7 +60,7 @@ export default function ProfilePage() {
         const postsData = await postsResponse.json();
         setPosts(postsData.map((post: any) => ({
           id: post.id,
-          imageUrl: `http://localhost:8000/media/${post.image_path}`,
+          imageUrl: `${getApiUrl("/media/")}${post.image_path}`,
           caption: post.caption,
           createdAt: post.created_at,
         })));

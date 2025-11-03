@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getApiUrl } from "@/config/api";
 import PostCard, { type Post } from "@/components/PostCard";
 
 export default function FeedPage() {
@@ -21,7 +22,7 @@ export default function FeedPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/posts/feed?page=${pageNum}`, {
+      const response = await fetch(getApiUrl(`/api/posts/feed/?page=${pageNum}`), {
         credentials: "include",
       });
 
@@ -38,7 +39,7 @@ export default function FeedPage() {
               ? `data:image/jpeg;base64,${post.profile_picture_base64}` 
               : undefined,
           },
-          imageUrl: `http://localhost:8000/media/${post.image_path}`,
+          imageUrl: `${getApiUrl("/media/")}${post.image_path}`,
           caption: post.caption,
           createdAt: post.created_at,
           comments: post.comments?.map((comment: any) => ({
@@ -100,7 +101,7 @@ export default function FeedPage() {
   // Handle comment submission
   const handleComment = async (postId: string, commentText: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/posts/${postId}/comments/create/`, {
+      const response = await fetch(getApiUrl(`/api/posts/${postId}/comments/create/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

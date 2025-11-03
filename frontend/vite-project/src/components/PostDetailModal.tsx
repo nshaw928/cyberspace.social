@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/config/api";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -38,7 +39,7 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
 
   const fetchPostDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/posts/${postId}/`, {
+      const response = await fetch(getApiUrl(`/api/posts/${postId}/`, {
         credentials: "include",
       });
 
@@ -110,7 +111,7 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
             {/* Post Image */}
             <div className="w-full aspect-square bg-muted relative overflow-hidden">
               <img
-                src={`http://localhost:8000/media/${post.image_path}`}
+                src={`${getApiUrl("/media/")}${post.image_path}`}
                 alt={post.caption}
                 className="w-full h-full object-cover"
               />

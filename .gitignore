@@ -4,3 +4,18 @@
 /backend/bruno
 
 /frontend/vite-project/node_modules
+/frontend/vite-project/.env.local
+
+deploy_inst.md
+DEPLOYMENT.md
+DOCKER_SETUP_SUMMARY.md
+QUICK_START.md
+QUICKSTART.md
+
+# Environment files (keep .env.example)
+.env
+
+# Docker volumes
+postgres_data/
+media_files/
+static_files/

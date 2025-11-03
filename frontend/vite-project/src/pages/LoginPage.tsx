@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { getApiUrl } from "@/config/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,7 @@ function LoginPage() {
 
         try {
         // Call your backend API
-        const response = await fetch("http://localhost:8000/account/token", {
+        const response = await fetch(getApiUrl("/account/token", {
             method: "POST",
             headers: {
             "Content-Type": "application/json",

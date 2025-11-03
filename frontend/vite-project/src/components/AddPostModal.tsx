@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { getApiUrl } from "@/config/api";
 import { Upload, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -122,7 +123,7 @@ export default function AddPostModal({ open, onOpenChange, onPostCreated }: AddP
       formData.append("caption", caption);
 
       // TODO: Replace with actual API call
-      const response = await fetch("http://localhost:8000/api/posts/", {
+      const response = await fetch(getApiUrl("/api/posts/", {
         method: "POST",
         credentials: "include",
         body: formData,

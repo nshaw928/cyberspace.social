@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getApiUrl } from "@/config/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +43,7 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/profile/me/", {
+      const response = await fetch(getApiUrl("/api/profile/me/", {
         credentials: "include",
       });
 
@@ -79,7 +80,7 @@ export default function SettingsPage() {
     setSuccess(false);
 
     try {
-      const response = await fetch("http://localhost:8000/api/profile/me/", {
+      const response = await fetch(getApiUrl("/api/profile/me/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -138,7 +139,7 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append("image", selectedImage);
 
-      const response = await fetch("http://localhost:8000/api/profile/picture/", {
+      const response = await fetch(getApiUrl("/api/profile/picture/", {
         method: "POST",
         credentials: "include",
         body: formData,

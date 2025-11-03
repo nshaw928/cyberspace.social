@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getApiUrl } from "@/config/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ function RegisterPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/account/register", {
+      const response = await fetch(getApiUrl("/account/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +41,7 @@ function RegisterPage() {
 
       if (response.ok) {
         // After successful registration, auto-login
-        const loginResponse = await fetch("http://localhost:8000/account/token", {
+        const loginResponse = await fetch(getApiUrl("/account/token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/config/api";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,7 @@ export default function FriendManagementPage() {
 
   const fetchFriends = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/friends/", {
+      const response = await fetch(getApiUrl("/api/friends/", {
         credentials: "include",
       });
       if (response.ok) {
@@ -74,7 +75,7 @@ export default function FriendManagementPage() {
 
   const fetchFriendRequests = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/friends/requests/", {
+      const response = await fetch(getApiUrl("/api/friends/requests/", {
         credentials: "include",
       });
       if (response.ok) {
@@ -88,7 +89,7 @@ export default function FriendManagementPage() {
 
   const fetchSentRequests = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/friends/sent/", {
+      const response = await fetch(getApiUrl("/api/friends/sent/", {
         credentials: "include",
       });
       if (response.ok) {
@@ -111,7 +112,7 @@ export default function FriendManagementPage() {
     setSuccess("");
 
     try {
-      const response = await fetch(`http://localhost:8000/api/friends/request/`, {
+      const response = await fetch(getApiUrl(`/api/friends/request/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +140,7 @@ export default function FriendManagementPage() {
 
   const handleAcceptRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/friends/accept/${requestId}/`, {
+      const response = await fetch(getApiUrl(`/api/friends/accept/${requestId}/`, {
         method: "PUT",
         credentials: "include",
       });
@@ -159,7 +160,7 @@ export default function FriendManagementPage() {
 
   const handleDeclineRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/friends/decline/${requestId}/`, {
+      const response = await fetch(getApiUrl(`/api/friends/decline/${requestId}/`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -178,7 +179,7 @@ export default function FriendManagementPage() {
 
   const handleCancelRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/friends/cancel/${requestId}/`, {
+      const response = await fetch(getApiUrl(`/api/friends/cancel/${requestId}/`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -198,7 +199,7 @@ export default function FriendManagementPage() {
   const handleRemoveFriend = async (friendId: string) => {
     if (confirm("Are you sure you want to remove this friend?")) {
       try {
-        const response = await fetch(`http://localhost:8000/api/friends/${friendId}/`, {
+        const response = await fetch(getApiUrl(`/api/friends/${friendId}/`, {
           method: "DELETE",
           credentials: "include",
         });

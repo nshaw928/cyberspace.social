@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { getApiUrl } from "@/config/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch("http://localhost:8000/account/authenticated", {
+      const response = await fetch(getApiUrl("/account/authenticated"), {
         method: "POST",
         credentials: "include", // Important: include cookies
       });
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Fetch username if authenticated
         if (data.authenticated) {
           try {
-            const profileResponse = await fetch("http://localhost:8000/api/profile/me/", {
+            const profileResponse = await fetch(getApiUrl("/api/profile/me/"), {
               credentials: "include",
             });
             if (profileResponse.ok) {
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async () => {
     try {
-      const response = await fetch("http://localhost:8000/account/logout", {
+      const response = await fetch(getApiUrl("/account/logout"), {
         method: "POST",
         credentials: "include",
       });

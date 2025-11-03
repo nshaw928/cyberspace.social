@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/config/api";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PostDetailModal from "@/components/PostDetailModal";
@@ -37,7 +38,7 @@ export default function UserProfilePage() {
 
     try {
       // Fetch profile data
-      const profileResponse = await fetch(`http://localhost:8000/api/profile/${username}/`, {
+      const profileResponse = await fetch(getApiUrl(`/api/profile/${username}/`, {
         credentials: "include",
       });
 
@@ -57,7 +58,7 @@ export default function UserProfilePage() {
       }
 
       // Fetch user's posts
-      const postsResponse = await fetch(`http://localhost:8000/api/posts/user/${username}/`, {
+      const postsResponse = await fetch(getApiUrl(`/api/posts/user/${username}/`, {
         credentials: "include",
       });
 
@@ -66,7 +67,7 @@ export default function UserProfilePage() {
         setPosts(
           postsData.map((post: any) => ({
             id: post.id,
-            imageUrl: `http://localhost:8000/media/${post.image_path}`,
+            imageUrl: `${getApiUrl("/media/")}${post.image_path}`,
             caption: post.caption,
             createdAt: post.created_at,
           }))

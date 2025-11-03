@@ -1,0 +1,6 @@
+vite-project/node_modules/
+vite-project/dist/
+.git/
+.gitignore
+*.log
+vite-project/.env.local
