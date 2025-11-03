@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface Comment {
   id: string;
@@ -62,7 +63,7 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto p-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto p-0" showCloseButton={false}>
         {loading ? (
           <div className="flex justify-center items-center min-h-[400px]">
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -76,18 +77,8 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
           </div>
         ) : post ? (
           <div className="flex flex-col">
-            {/* Post Image */}
-            <div className="w-full aspect-square bg-muted relative overflow-hidden">
-              <img
-                src={`http://localhost:8000/media/${post.image_path}`}
-                alt={post.caption}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Post Content */}
-            <div className="p-6 space-y-4">
-              {/* User Info */}
+            {/* Header: User Info + Close Button */}
+            <div className="p-6 pb-4 flex items-center justify-between border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center overflow-hidden">
                   {post.profile_picture_base64 ? (
@@ -105,7 +96,28 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
                   <p className="text-xs text-muted-foreground">@{post.username}</p>
                 </div>
               </div>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-accent"
+              >
+                <X className="h-5 w-5" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
 
+            {/* Post Image */}
+            <div className="w-full aspect-square bg-muted relative overflow-hidden">
+              <img
+                src={`http://localhost:8000/media/${post.image_path}`}
+                alt={post.caption}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Post Content */}
+            <div className="p-6 space-y-4">
               {/* Caption */}
               <div>
                 <p className="text-sm text-foreground whitespace-pre-wrap break-words">
@@ -135,13 +147,6 @@ export default function PostDetailModal({ postId, onClose }: PostDetailModalProp
                   ))}
                 </div>
               )}
-
-              {/* Close Button */}
-              <div className="flex justify-end pt-2">
-                <Button onClick={onClose} variant="outline">
-                  Close
-                </Button>
-              </div>
             </div>
           </div>
         ) : null}
